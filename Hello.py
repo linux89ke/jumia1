@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import os
-from datetime import datetime
 
 def merge_csv_files(sellers_df, category_tree_df, csv_files):
     # Your existing merging logic here
@@ -20,19 +19,21 @@ def merge_csv_files(sellers_df, category_tree_df, csv_files):
 def main():
     st.title('CSV File Merger')
     
-    # File uploader for Global*.csv files
-    csv_files = st.file_uploader("Upload Global CSV Files", type=["csv"], accept_multiple_files=True)
-
-    # Check if sellers and category tree files exist in the script folder
+    # Check if sellers.xlsx and category_tree.xlsx exist in the script folder
     sellers_file_path = "sellers.xlsx"
     category_tree_file_path = "category_tree.xlsx"
-    
-    if os.path.exists(sellers_file_path) and os.path.exists(category_tree_file_path):
+
+    sellers_df = None
+    category_tree_df = None
+
+    if os.path.isfile(sellers_file_path):
         sellers_df = pd.read_excel(sellers_file_path)
+
+    if os.path.isfile(category_tree_file_path):
         category_tree_df = pd.read_excel(category_tree_file_path)
-    else:
-        sellers_df = None
-        category_tree_df = None
+
+    # File uploader for Global*.csv files
+    csv_files = st.file_uploader("Upload Global CSV Files", type=["csv"], accept_multiple_files=True)
 
     # Button to trigger the merging process
     if st.button("Merge CSV Files"):
@@ -53,7 +54,7 @@ def main():
             
             st.success(f"CSV files merged successfully. Click the button above to download the merged file.")
         else:
-            st.warning("Please upload all required files.")
+            st.warning("Please ensure sellers.xlsx, category_tree.xlsx, and at least one CSV file are present.")
 
 if __name__ == "__main__":
     main()

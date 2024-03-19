@@ -66,14 +66,15 @@ def main():
     all_files = os.listdir(script_folder)
 
     # Filter files that start with 'AuditLogEntry' and have valid extensions
-    main_files = [file for file in all_files if file.startswith('AuditLogEntry') and file.lower().endswith(('.xls', '.xlsx', '.ods', '.csv'))]
+    valid_extensions = ('.xls', '.xlsx', '.ods', '.csv')
+    main_files = [file for file in all_files if file.startswith('AuditLogEntry') and file.lower().endswith(valid_extensions)]
 
     if not main_files:
         st.error("No matching files found with pattern: AuditLogEntry*.{xls, xlsx, ods, csv}")
         st.stop()
 
     # Choose the latest modified file
-    main_file_path = st.file_uploader("Upload Audit Log File", type=["xlsx", "xls", "csv"])
+    main_file_path = st.file_uploader("Upload Audit Log File", key="main_file", type=["xlsx", "xls", "csv"])
 
     if not main_file_path:
         st.warning("Please upload the audit log file.")
@@ -82,7 +83,7 @@ def main():
     st.info(f"Selected main file: {os.path.basename(main_file_path.name)}")
 
     # Select sellers file
-    sellers_file_path = st.file_uploader("Upload Sellers File", type=["xlsx", "xls", "csv"])
+    sellers_file_path = st.file_uploader("Upload Sellers File", key="sellers_file", type=["xlsx", "xls", "csv"])
 
     if not sellers_file_path:
         st.warning("Please upload the sellers file.")

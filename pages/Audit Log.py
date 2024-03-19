@@ -29,6 +29,10 @@ def main():
             # Read the main file and sellers file into DataFrames
             main_df = pd.read_excel(main_file, engine='openpyxl') if main_file.name.lower().endswith(('.xls', '.xlsx')) else pd.read_csv(main_file, delimiter=';')
 
+            # Count number of rows in the input file
+            num_rows_input = len(main_df)
+            st.write(f"Number of rows in input file: {num_rows_input}")
+
             # Remove ") has been created" from the 'Description' column
             main_df['Description'] = main_df['Description'].str.replace(') has been created', '')
 

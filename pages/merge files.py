@@ -3,9 +3,19 @@ import streamlit as st
 import base64
 
 def preprocess_data(df):
-    # Split the 'Categories' column into multiple columns
-    df[['ID', 'Categories']] = df['Categories'].str.split(' - ', 1, expand=True)
-    df['Categories'] = df['Categories'].str.strip()
+    # Check if 'Categories' column exists in the DataFrame
+    if 'Categories' in df.columns:
+        # Split the 'Categories' column into 'ID' and 'Full Value'
+        df[['ID', 'Full Value']] = df['Categories'].str.split(' - ', 1, expand=True)
+        # Split the 'Full Value' column into individual categories
+        df['Categories'] = df['Full Value'].str.split(' / ')
+        # Fill missing values with empty lists
+        df['Categories'] = df['Categories'].fillna('').astype(str)
+    else:
+        # If 'Categories' column is not present, create dummy columns
+        df['ID'] = ""
+        df['Full Value'] = ""
+        df['Categories'] = ""
     return df
 
 def merge_excel_files(files):

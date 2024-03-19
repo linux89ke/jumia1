@@ -25,6 +25,9 @@ def main():
         # Read the main file and sellers file into DataFrames
         main_df = pd.read_excel(main_file, engine='openpyxl') if main_file.name.lower().endswith(('.xls', '.xlsx')) else pd.read_csv(main_file, delimiter=';')
         
+        # Display number of rows in the input file
+        st.write(f"Number of rows in input file: {len(main_df)}")
+
         # Remove ") has been created" from the 'Description' column
         main_df['Description'] = main_df['Description'].str.replace(') has been created', '')
 
@@ -48,11 +51,13 @@ def main():
         result_df['Reject Reason Ids'] = ''
         result_df['Rejection Message'] = ''
 
+        # Get user input for number of rows in each chunk
+        chunk_size = st.number_input("Enter the number of rows in each chunk of the output files", min_value=1, value=1000)
+
         # Save the modified DataFrame to a new folder
         output_folder_name = f'output_{pd.Timestamp.now().strftime("%Y-%m-%d_%H%M%S")}'
         os.makedirs(output_folder_name, exist_ok=True)
 
-        chunk_size = 80000
         chunks = [result_df[i:i + chunk_size] for i in range(0, len(result_df), chunk_size)]
 
         for i, chunk in enumerate(chunks):

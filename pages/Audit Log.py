@@ -93,4 +93,15 @@ def main():
                         filepath = os.path.join(output_folder_name, filename)
                         zipf.write(filepath, arcname=filename)
 
-            st.success
+            st.success("Zip file created successfully.")
+            st.download_button(label="Download All as Zip", data=open(f"{output_folder_name}.zip", "rb").read(), file_name=f"{output_folder_name}.zip", mime="application/zip")
+
+        except FileNotFoundError as file_not_found_error:
+            st.error(f"Error: {file_not_found_error}. Please make sure the files exist.")
+        except pd.errors.ParserError as parser_error:
+            st.error(f"Error parsing the input files: {parser_error}")
+        except Exception as e:
+            st.error(f"An unexpected error occurred: {e}")
+
+if __name__ == "__main__":
+    main()

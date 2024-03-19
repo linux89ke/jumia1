@@ -7,9 +7,6 @@ import zipfile
 def main():
     st.title("Audit Log Processor")
 
-    # Input field for the number of rows in each chunk
-    chunk_size = st.number_input("Enter the number of rows in each chunk of the output files", min_value=1, value=10000)
-
     # File uploader for the main audit log file
     main_file = st.file_uploader("Upload Audit Log File", type=["xlsx", "xls", "csv"])
 
@@ -24,15 +21,18 @@ def main():
         st.warning("Please upload the sellers file.")
         st.stop()
 
+    # Read the main file into a DataFrame to get the number of rows
+    main_df = pd.read_excel(main_file, engine='openpyxl') if main_file.name.lower().endswith(('.xls', '.xlsx')) else pd.read_csv(main_file, delimiter=';')
+    num_rows_input = len(main_df)
+
+    # Display the number of rows in the input file
+    st.write(f"Number of rows in input file: {num_rows_input}")
+
+    # Input field for the number of rows in each chunk
+    chunk_size = st.number_input("Enter the number of rows in each chunk of the output files", min_value=1, value=1000)
+
     if st.button("Process"):
         try:
-            # Read the main file and sellers file into DataFrames
-            main_df = pd.read_excel(main_file, engine='openpyxl') if main_file.name.lower().endswith(('.xls', '.xlsx')) else pd.read_csv(main_file, delimiter=';')
-
-            # Count number of rows in the input file
-            num_rows_input = len(main_df)
-            st.write(f"Number of rows in input file: {num_rows_input}")
-
             # Remove ") has been created" from the 'Description' column
             main_df['Description'] = main_df['Description'].str.replace(') has been created', '')
 

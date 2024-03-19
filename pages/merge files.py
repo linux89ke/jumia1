@@ -30,12 +30,16 @@ def merge_excel_files(files):
     # Iterate through each file
     for file in files:
         # Read Excel file into a DataFrame
-        df = pd.read_excel(file)
-        # Preprocess the data to split categories into separate columns
-        df = preprocess_data(df)
-        # Add filename as a prefix to each column name to differentiate columns from different files
-        df.columns = [f"{file}_{col}" for col in df.columns]
-        dfs.append(df)
+        xls = pd.ExcelFile(file)
+        # Check if the sheet "Categories" exists in the file
+        if "Categories" in xls.sheet_names:
+            # Read the sheet into a DataFrame
+            df = pd.read_excel(file, sheet_name="Categories")
+            # Preprocess the data to split categories into separate columns
+            df = preprocess_data(df)
+            # Add filename as a prefix to each column name to differentiate columns from different files
+            df.columns = [f"{file}_{col}" for col in df.columns]
+            dfs.append(df)
 
     # Concatenate all DataFrames
     merged_df = pd.concat(dfs, axis=1)

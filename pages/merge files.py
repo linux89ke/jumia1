@@ -38,14 +38,11 @@ def merge_excel_files(files):
             # Preprocess the data to split categories into separate columns
             df = preprocess_data(df)
             # Add filename as a prefix to each column name to differentiate columns from different files
-            df.columns = [f"{file}_{col}" for col in df.columns]
+            # df.columns = [f"{file}_{col}" for col in df.columns]
             dfs.append(df)
 
-    # Concatenate all DataFrames
-    merged_df = pd.concat(dfs, axis=1)
-
-    # Drop duplicate columns
-    merged_df = merged_df.loc[:,~merged_df.columns.duplicated()]
+    # Concatenate all DataFrames vertically
+    merged_df = pd.concat(dfs, ignore_index=True)
 
     return merged_df
 

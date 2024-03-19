@@ -14,14 +14,11 @@ def main():
         st.warning("Please upload the audit log file.")
         st.stop()
 
-    # Get the path of the current script file
-    script_folder = os.path.dirname(os.path.abspath(__file__))
+    # File uploader for the sellers file
+    sellers_file = st.file_uploader("Upload Sellers File", type=["xlsx", "xls", "csv"])
 
-    # Locate the sellers file in the same folder as the script file
-    sellers_file_path = os.path.join(script_folder, "sellers.xlsx")
-
-    if not os.path.isfile(sellers_file_path):
-        st.warning("Sellers file not found. Please make sure 'sellers.xlsx' exists in the same folder as this script.")
+    if sellers_file is None:
+        st.warning("Please upload the sellers file.")
         st.stop()
 
     # Read the main file into a DataFrame to get the number of rows
@@ -43,7 +40,10 @@ def main():
             main_df['SKU'] = main_df['Description'].str.split().str[-1]
 
             # Read the sellers file
-            sellers_df = pd.read_excel(sellers_file_path, engine='openpyxl')
+            sellers_df = pd.read_excel(sellers_file, engine='openpyxl')
+
+            # Debugging: Check the column names of the sellers DataFrame
+            st.write("Columns in sellers_df:", sellers_df.columns)
 
             # Perform VLOOKUP to add a 'Seller_ID' column to the main file
             merged_df = pd.merge(main_df, sellers_df[['User', 'Seller_ID']], on='User', how='left')

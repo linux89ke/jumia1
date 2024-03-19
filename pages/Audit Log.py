@@ -60,6 +60,10 @@ def main():
 
         st.success(f'Modified data saved to the new folder: {output_folder_name}')
 
+        # Create download buttons for each output file
+        for i, chunk in enumerate(chunks):
+            st.download_button(label=f"Download Chunk {chr(ord('A') + i)}", data=chunk.to_csv(index=False, sep=';'), file_name=f"Chunk_{chr(ord('A') + i)}_{main_file.name}.csv", mime="text/csv")
+
     except FileNotFoundError as file_not_found_error:
         st.error(f"Error: {file_not_found_error}. Please make sure the files exist.")
     except pd.errors.ParserError as parser_error:

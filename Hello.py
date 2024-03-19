@@ -1,16 +1,28 @@
 import streamlit as st
 import pandas as pd
 import os
+import gdown  # for downloading files from Google Drive
 from datetime import datetime
 
-@st.cache(allow_output_mutation=True)
-def load_data(file):
-    return pd.read_excel(file)
+def download_file(url, output_path):
+    """
+    Downloads a file from the given URL to the specified output path.
+    """
+    with st.spinner("Downloading file..."):
+        gdown.download(url, output_path, quiet=False)
 
-def merge_csv_files(output_file, sellers_df, category_tree_df):
+def merge_csv_files(output_file, sellers_df, category_tree_df, csv_files):
     # Your existing merging logic here
+    result_df = pd.DataFrame(columns=["SellerName", "SellerSku", "PrimaryCategory", "Name", "Brand"])
 
-    # Return the merged DataFrame
+    # Merge all uploaded CSV files
+    for csv_file in csv_files:
+        df = pd.read_csv(csv_file, delimiter=';', usecols=["SellerName", "SellerSku", "PrimaryCategory", "Name", "Brand"])
+        result_df = pd.concat([result_df, df])
+
+    # Call the function to merge the CSV files, perform VLOOKUP, and update PrimaryCategory
+    result_df = merge_csv_files(output_file, sellers_df, category_tree_df)
+
     return result_df
 
 def main():
@@ -19,48 +31,43 @@ def main():
     # File uploader for Global*.csv files
     csv_files = st.file_uploader("Upload Global CSV Files", type=["csv"], accept_multiple_files=True)
 
-    # File uploader for sellers.xlsx
-    sellers_file = st.file_uploader("Upload Sellers Excel File", type=["xlsx"])
+    # Check if the sellers and category tree files are already downloaded
+    sellers_file_path = "sellers.xlsx"
+    category_tree_file_path = "category_tree.xlsx"
 
-    # File uploader for category_tree.xlsx
-    category_tree_file = st.file_uploader("Upload Category Tree Excel File", type=["xlsx"])
-
-    # Load or cache sellers and category tree files
-    if sellers_file is not None:
-        sellers_df = load_data(sellers_file)
+    if not os.path.exists(sellers_file_path):
+        st.warning("Sellers Excel file not found. Please upload or provide the link.")
+        sellers_url = st.text_input("Enter the link to the Sellers Excel file:")
+        if sellers_url:
+            download_file(sellers_url, sellers_file_path)
     else:
-        st.warning("Please upload sellers.xlsx file.")
+        st.success("Sellers Excel file found.")
 
-    if category_tree_file is not None:
-        category_tree_df = load_data(category_tree_file)
+    if not os.path.exists(category_tree_file_path):
+        st.warning("Category Tree Excel file not found. Please upload or provide the link.")
+        category_tree_url = st.text_input("Enter the link to the Category Tree Excel file:")
+        if category_tree_url:
+            download_file(category_tree_url, category_tree_file_path)
     else:
-        st.warning("Please upload category_tree.xlsx file.")
+        st.success("Category Tree Excel file found.")
 
     # Button to trigger the merging process
     if st.button("Merge CSV Files"):
-        if sellers_file is not None and category_tree_file is not None:
-            # Check if at least one CSV file is uploaded
-            if csv_files:
-                result_df = pd.DataFrame(columns=["SellerName", "SellerSku", "PrimaryCategory", "Name", "Brand"])
+        if csv_files:
+            sellers_df = pd.read_excel(sellers_file_path)
+            category_tree_df = pd.read_excel(category_tree_file_path)
 
-                # Merge all uploaded CSV files
-                for csv_file in csv_files:
-                    df = pd.read_csv(csv_file, delimiter=';', usecols=["SellerName", "SellerSku", "PrimaryCategory", "Name", "Brand"])
-                    result_df = pd.concat([result_df, df])
+            # Specify the output file name
+            output_file = "Merged_skus_date.csv"
 
-                # Specify the output file name
-                output_file = "Merged_skus_date.csv"
+            # Call the function to merge the CSV files, perform VLOOKUP, and update PrimaryCategory
+            result_df = merge_csv_files(output_file, sellers_df, category_tree_df, csv_files)
 
-                # Call the function to merge the CSV files, perform VLOOKUP, and update PrimaryCategory
-                result_df = merge_csv_files(output_file, sellers_df, category_tree_df)
-
-                # Write result to a CSV file
-                result_df.to_csv(output_file, index=False)
-                st.success(f"CSV files merged successfully. Download the merged file from [here](./{output_file})")
-            else:
-                st.warning("Please upload at least one CSV file.")
+            # Write result to a CSV file
+            result_df.to_csv(output_file, index=False)
+            st.success(f"CSV files merged successfully. Download the merged file from [here](./{output_file})")
         else:
-            st.warning("Please upload both sellers.xlsx and category_tree.xlsx files.")
+            st.warning("Please upload at least one CSV file.")
 
 if __name__ == "__main__":
     main()

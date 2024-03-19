@@ -23,27 +23,20 @@ def main():
     # File uploader for Global*.csv files
     csv_files = st.file_uploader("Upload Global CSV Files", type=["csv"], accept_multiple_files=True)
 
-    # File uploader for sellers.xlsx
-    sellers_file = st.file_uploader("Upload Sellers Excel File", type=["xlsx"])
-    # File uploader for category_tree.xlsx
-    category_tree_file = st.file_uploader("Upload Category Tree Excel File", type=["xlsx"])
-
-    # Save uploaded sellers and category tree files within the Streamlit app's directory
-    if sellers_file:
-        with open(os.path.join("sellers.xlsx"), "wb") as f:
-            f.write(sellers_file.getvalue())
-
-    if category_tree_file:
-        with open(os.path.join("category_tree.xlsx"), "wb") as f:
-            f.write(category_tree_file.getvalue())
+    # Check if sellers and category tree files exist in the script folder
+    sellers_file_path = "sellers.xlsx"
+    category_tree_file_path = "category_tree.xlsx"
+    
+    if os.path.exists(sellers_file_path) and os.path.exists(category_tree_file_path):
+        sellers_df = pd.read_excel(sellers_file_path)
+        category_tree_df = pd.read_excel(category_tree_file_path)
+    else:
+        sellers_df = None
+        category_tree_df = None
 
     # Button to trigger the merging process
     if st.button("Merge CSV Files"):
-        if csv_files and os.path.exists("sellers.xlsx") and os.path.exists("category_tree.xlsx"):
-            # Read cached Excel files
-            sellers_df = pd.read_excel("sellers.xlsx")
-            category_tree_df = pd.read_excel("category_tree.xlsx")
-
+        if csv_files and sellers_df is not None and category_tree_df is not None:
             # Specify the output file name
             output_file = "Merged_skus_date.csv"
 
@@ -60,7 +53,7 @@ def main():
             
             st.success(f"CSV files merged successfully. Click the button above to download the merged file.")
         else:
-            st.warning("Please upload all required files or ensure sellers.xlsx and category_tree.xlsx are in the Streamlit app's directory.")
+            st.warning("Please upload all required files.")
 
 if __name__ == "__main__":
     main()

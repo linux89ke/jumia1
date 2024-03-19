@@ -9,21 +9,20 @@ def merge_excel_files(files):
         st.error("No files provided.")
         return None
     
-    # Initialize an empty DataFrame to store the merged data
-    merged_df = pd.DataFrame()
+    # Initialize an empty list to store DataFrames
+    dfs = []
 
     # Iterate through each file
     for file in files:
         # Read Excel file into a DataFrame
         df = pd.read_excel(file)
-        # Iterate through each row in the DataFrame
-        for index, row in df.iterrows():
-            # Convert the row to a tuple to use it as a key
-            row_key = tuple(row)
-            # Check if the row is already in the merged DataFrame
-            if row_key not in [tuple(r) for r in merged_df.values]:
-                # If the row is not in the merged DataFrame, append it
-                merged_df = merged_df.append(row, ignore_index=True)
+        dfs.append(df)
+
+    # Concatenate all DataFrames
+    merged_df = pd.concat(dfs, ignore_index=True)
+
+    # Drop duplicate rows
+    merged_df.drop_duplicates(inplace=True)
 
     return merged_df
 

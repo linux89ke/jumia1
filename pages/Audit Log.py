@@ -43,7 +43,10 @@ def main():
 
             # If sellers.xlsx exists, perform VLOOKUP to add a 'Seller_ID' column to the main file
             if sellers_df is not None:
+                st.write("Columns in main_df:", main_df.columns)
+                st.write("Columns in sellers_df:", sellers_df.columns)
                 main_df = pd.merge(main_df, sellers_df[['User', 'Seller_ID']], on='User', how='left')
+                st.write("Columns in merged DataFrame:", main_df.columns)
 
             # Keep only relevant columns
             result_df = main_df[['Seller_ID', 'SKU']].copy()

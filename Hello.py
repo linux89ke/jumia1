@@ -18,16 +18,13 @@ def merge_csv_files(sellers_df, category_tree_df, csv_files):
 
 def main():
     st.title('CSV File Merger')
-    
-    # Check if sellers.xlsx and category_tree.xlsx exist in the script folder
-    sellers_file_path = "sellers.xlsx"
+
+    # File uploader for sellers.xlsx
+    sellers_file = st.file_uploader("Upload Sellers Excel File", type=["xlsx"])
+
+    # Check if category_tree.xlsx exists in the script folder
     category_tree_file_path = "category_tree.xlsx"
-
-    sellers_df = None
     category_tree_df = None
-
-    if os.path.isfile(sellers_file_path):
-        sellers_df = pd.read_excel(sellers_file_path)
 
     if os.path.isfile(category_tree_file_path):
         category_tree_df = pd.read_excel(category_tree_file_path)
@@ -37,7 +34,10 @@ def main():
 
     # Button to trigger the merging process
     if st.button("Merge CSV Files"):
-        if csv_files and sellers_df is not None and category_tree_df is not None:
+        if csv_files and sellers_file and category_tree_df is not None:
+            # Read sellers Excel file
+            sellers_df = pd.read_excel(sellers_file)
+
             # Specify the output file name
             output_file = "Merged_skus_date.csv"
 
@@ -51,10 +51,10 @@ def main():
             with open(output_file, "rb") as file:
                 file_contents = file.read()
             st.download_button(label="Download Merged File", data=file_contents, file_name=output_file, mime="text/csv")
-            
+
             st.success(f"CSV files merged successfully. Click the button above to download the merged file.")
         else:
-            st.warning("Please ensure sellers.xlsx, category_tree.xlsx, and at least one CSV file are present.")
+            st.warning("Please upload sellers.xlsx, ensure category_tree.xlsx is present, and upload at least one CSV file.")
 
 if __name__ == "__main__":
     main()

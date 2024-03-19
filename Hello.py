@@ -29,8 +29,9 @@ def main():
     # File uploader for Global*.csv files
     csv_files = st.file_uploader("Upload Global CSV Files", type=["csv"], accept_multiple_files=True)
 
-    # Sellers and Category Tree file uploaders
+    # File uploader for sellers.xlsx
     sellers_file = st.file_uploader("Upload Sellers Excel File", type=["xlsx"], key="sellers")
+    # File uploader for category_tree.xlsx
     category_tree_file = st.file_uploader("Upload Category Tree Excel File", type=["xlsx"], key="category_tree")
 
     # Load cached Excel files

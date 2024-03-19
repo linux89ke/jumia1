@@ -8,7 +8,7 @@ def main():
     st.title("Audit Log Processor")
 
     # Input field for the number of rows in each chunk
-    chunk_size = st.number_input("Enter the number of rows in each chunk of the output files", min_value=1, value=1000)
+    chunk_size = st.number_input("Enter the number of rows in each chunk of the output files", min_value=1, value=10000)
 
     # File uploader for the main audit log file
     main_file = st.file_uploader("Upload Audit Log File", type=["xlsx", "xls", "csv"])

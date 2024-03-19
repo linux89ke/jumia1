@@ -16,6 +16,12 @@ def merge_csv_files(sellers_df, category_tree_df, csv_files):
 
     return result_df
 
+@st.cache(suppress_st_warning=True)
+def load_cached_excel(file_uploader):
+    if file_uploader:
+        return pd.read_excel(file_uploader)
+    return None
+
 def main():
     st.title('CSV File Merger')
     
@@ -27,13 +33,13 @@ def main():
     # File uploader for category_tree.xlsx
     category_tree_file = st.file_uploader("Upload Category Tree Excel File", type=["xlsx"], key="category_tree")
 
+    # Load cached Excel files
+    sellers_df = load_cached_excel(sellers_file)
+    category_tree_df = load_cached_excel(category_tree_file)
+
     # Button to trigger the merging process
     if st.button("Merge CSV Files"):
-        if csv_files and sellers_file and category_tree_file:
-            # Read cached Excel files
-            sellers_df = pd.read_excel(sellers_file)
-            category_tree_df = pd.read_excel(category_tree_file)
-
+        if csv_files and sellers_df is not None and category_tree_df is not None:
             # Specify the output file name
             output_file = "Merged_skus_date.csv"
 

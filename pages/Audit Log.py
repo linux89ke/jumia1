@@ -14,14 +14,11 @@ def main():
         st.warning("Please upload the audit log file.")
         st.stop()
 
-    # Get the path of the current script file
-    script_folder = os.path.dirname(os.path.abspath(__file__))
+    # File uploader for the sellers file
+    sellers_file = st.file_uploader("Upload Sellers File", type=["xlsx", "xls", "csv"])
 
-    # Locate the sellers file in the same folder as the script file
-    sellers_file_path = os.path.join(script_folder, "sellers.xlsx")
-
-    if not os.path.isfile(sellers_file_path):
-        st.warning("Sellers file not found. Please make sure 'sellers.xlsx' exists in the same folder as this script.")
+    if sellers_file is None:
+        st.warning("Please upload the sellers file.")
         st.stop()
 
     # Read the main file into a DataFrame to get the number of rows
@@ -34,7 +31,20 @@ def main():
             st.error("Unsupported file format. Please upload an Excel file (.xlsx, .xls) or a CSV file.")
             st.stop()
     except Exception as e:
-        st.error(f"An error occurred while reading the file: {e}")
+        st.error(f"An error occurred while reading the audit log file: {e}")
+        st.stop()
+
+    # Read the sellers file into a DataFrame
+    try:
+        if sellers_file.name.lower().endswith(('.xls', '.xlsx')):
+            sellers_df = pd.read_excel(sellers_file, engine='openpyxl')
+        elif sellers_file.name.lower().endswith('.csv'):
+            sellers_df = pd.read_csv(sellers_file, delimiter=';')
+        else:
+            st.error("Unsupported file format. Please upload an Excel file (.xlsx, .xls) or a CSV file for the sellers.")
+            st.stop()
+    except Exception as e:
+        st.error(f"An error occurred while reading the sellers file: {e}")
         st.stop()
 
     num_rows_input = len(main_df)
@@ -52,9 +62,6 @@ def main():
 
             # Extract the last word and create a new column 'SKU'
             main_df['SKU'] = main_df['Description'].str.split().str[-1]
-
-            # Read the sellers file
-            sellers_df = pd.read_excel(sellers_file_path, engine='openpyxl')
 
             # Perform VLOOKUP to add a 'Seller_ID' column to the main file
             merged_df = pd.merge(main_df, sellers_df[['User', 'Seller_ID']], on='User', how='left')

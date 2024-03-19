@@ -1,4 +1,3 @@
-
 import pandas as pd
 import numpy as np
 import os
@@ -45,7 +44,7 @@ def process_audit_log(script_folder, main_file_path, sellers_file_path):
         chunks = [result_df[i:i + chunk_size] for i in range(0, len(result_df), chunk_size)]
 
         for i, chunk in enumerate(chunks):
-            output_file_path = os.path.join(output_folder_name, f'Chunk_{chr(ord("A") + i)}_{os.path.basename(main_file_path)}.csv')
+            output_file_path = os.path.join(output_folder_name, f'Chunk_{chr(ord("A") + i)}_{os.path.basename(main_file_path.name)}.csv')
             chunk.to_csv(output_file_path, index=False, sep=';')
 
         st.success(f'Modified data saved to the new folder: {output_folder_name}')
@@ -70,7 +69,7 @@ def main():
     main_files = [file for file in all_files if file.startswith('AuditLogEntry') and file.lower().endswith(('.xls', '.xlsx', '.ods', '.csv'))]
 
     if not main_files:
-        st.error(f"No matching files found with pattern: AuditLogEntry*.{xls,xlsx,ods,csv}")
+        st.error("No matching files found with pattern: AuditLogEntry*.{xls, xlsx, ods, csv}")
         st.stop()
 
     # Choose the latest modified file

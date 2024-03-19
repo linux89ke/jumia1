@@ -1,6 +1,7 @@
 import pandas as pd
 import streamlit as st
 from io import BytesIO
+import base64
 
 def merge_excel_files(files):
     # Check if any files are provided
@@ -15,8 +16,21 @@ def merge_excel_files(files):
     for file in files:
         # Read Excel file into a DataFrame
         df = pd.read_excel(file)
-        # Merge the DataFrame
-        merged_df = pd.concat([merged_df, df], ignore_index=True, sort=False)
+        # Iterate through each row in the DataFrame
+        for index, row in df.iterrows():
+            # Check if the row is already in the merged DataFrame
+            existing_row = merged_df[
+                (merged_df == row).all(axis=1)
+            ]  # Find rows that are identical
+            if len(existing_row) == 0:
+                # If the row is not in the merged DataFrame, append it
+                merged_df = merged_df.append(row, ignore_index=True)
+            else:
+                # If the row is in the merged DataFrame, update only missing values
+                existing_row_index = existing_row.index[0]
+                merged_df.loc[existing_row_index] = merged_df.loc[
+                    existing_row_index
+                ].combine_first(row)
 
     return merged_df
 

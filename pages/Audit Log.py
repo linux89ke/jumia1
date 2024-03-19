@@ -29,7 +29,7 @@ def main():
     st.write(f"Number of rows in input file: {num_rows_input}")
 
     # Input field for the number of rows in each chunk
-    chunk_size = st.number_input("Enter the number of rows in each chunk of the output files", min_value=1, value=1000)
+    chunk_size = st.number_input("Enter the number of rows in each chunk of the output files", min_value=1, value=15000)
 
     if st.button("Process"):
         try:

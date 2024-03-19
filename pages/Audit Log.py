@@ -14,12 +14,14 @@ def main():
         st.warning("Please upload the audit log file.")
         st.stop()
 
-    # File uploader for the sellers file
-    sellers_file = st.file_uploader("Upload Sellers File", type=["xlsx", "xls", "csv"])
+    # Check if sellers.xlsx exists in the script folder
+    script_folder = os.path.dirname(os.path.abspath(__file__))
+    sellers_file_path = os.path.join(script_folder, "sellers.xlsx")
 
-    if sellers_file is None:
-        st.warning("Please upload the sellers file.")
-        st.stop()
+    sellers_df = None
+
+    if os.path.isfile(sellers_file_path):
+        sellers_df = pd.read_excel(sellers_file_path)
 
     # Read the main file into a DataFrame to get the number of rows
     main_df = pd.read_excel(main_file, engine='openpyxl') if main_file.name.lower().endswith(('.xls', '.xlsx')) else pd.read_csv(main_file, delimiter=';')
@@ -29,7 +31,7 @@ def main():
     st.write(f"Number of rows in input file: {num_rows_input}")
 
     # Input field for the number of rows in each chunk
-    chunk_size = st.number_input("Enter the number of rows in each chunk of the output files", min_value=1000, value=15000)
+    chunk_size = st.number_input("Enter the number of rows in each chunk of the output files", min_value=1, value=1000)
 
     if st.button("Process"):
         try:
@@ -39,14 +41,12 @@ def main():
             # Extract the last word and create a new column 'SKU'
             main_df['SKU'] = main_df['Description'].str.split().str[-1]
 
-            # Read the sellers file
-            sellers_df = pd.read_excel(sellers_file, engine='openpyxl')
+            # If sellers.xlsx exists, perform VLOOKUP to add a 'Seller_ID' column to the main file
+            if sellers_df is not None:
+                main_df = pd.merge(main_df, sellers_df[['User', 'Seller_ID']], on='User', how='left')
 
-            # Perform VLOOKUP to add a 'Seller_ID' column to the main file
-            merged_df = pd.merge(main_df, sellers_df[['User', 'Seller_ID']], on='User', how='left')
-
-            # Keep only 'Seller_ID' and 'SKU' columns
-            result_df = merged_df[['Seller_ID', 'SKU']].copy()
+            # Keep only relevant columns
+            result_df = main_df[['Seller_ID', 'SKU']].copy()
 
             # Rename columns
             result_df.rename(columns={'Seller_ID': 'SellerID', 'SKU': 'SellerSku'}, inplace=True)

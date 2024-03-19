@@ -39,7 +39,7 @@ def main():
 
     # Button to trigger the merging process
     if st.button("Merge CSV Files"):
-        if csv_files and sellers_file and category_tree_file:
+        if csv_files and os.path.exists("sellers.xlsx") and os.path.exists("category_tree.xlsx"):
             # Read cached Excel files
             sellers_df = pd.read_excel("sellers.xlsx")
             category_tree_df = pd.read_excel("category_tree.xlsx")
@@ -60,7 +60,7 @@ def main():
             
             st.success(f"CSV files merged successfully. Click the button above to download the merged file.")
         else:
-            st.warning("Please upload all required files.")
+            st.warning("Please upload all required files or ensure sellers.xlsx and category_tree.xlsx are in the Streamlit app's directory.")
 
 if __name__ == "__main__":
     main()

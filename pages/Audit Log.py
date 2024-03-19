@@ -14,15 +14,29 @@ def main():
         st.warning("Please upload the audit log file.")
         st.stop()
 
-    # File uploader for the sellers file
-    sellers_file = st.file_uploader("Upload Sellers File", type=["xlsx", "xls", "csv"])
+    # Get the path of the current script file
+    script_folder = os.path.dirname(os.path.abspath(__file__))
 
-    if sellers_file is None:
-        st.warning("Please upload the sellers file.")
+    # Locate the sellers file in the same folder as the script file
+    sellers_file_path = os.path.join(script_folder, "sellers.xlsx")
+
+    if not os.path.isfile(sellers_file_path):
+        st.warning("Sellers file not found. Please make sure 'sellers.xlsx' exists in the same folder as this script.")
         st.stop()
 
     # Read the main file into a DataFrame to get the number of rows
-    main_df = pd.read_excel(main_file, engine='openpyxl') if main_file.name.lower().endswith(('.xls', '.xlsx')) else pd.read_csv(main_file, delimiter=';')
+    try:
+        if main_file.name.lower().endswith(('.xls', '.xlsx')):
+            main_df = pd.read_excel(main_file, engine='openpyxl')
+        elif main_file.name.lower().endswith('.csv'):
+            main_df = pd.read_csv(main_file, delimiter=';')
+        else:
+            st.error("Unsupported file format. Please upload an Excel file (.xlsx, .xls) or a CSV file.")
+            st.stop()
+    except Exception as e:
+        st.error(f"An error occurred while reading the file: {e}")
+        st.stop()
+
     num_rows_input = len(main_df)
 
     # Display the number of rows in the input file
@@ -40,10 +54,7 @@ def main():
             main_df['SKU'] = main_df['Description'].str.split().str[-1]
 
             # Read the sellers file
-            sellers_df = pd.read_excel(sellers_file, engine='openpyxl')
-
-            # Debugging: Check the column names of the sellers DataFrame
-            st.write("Columns in sellers_df:", sellers_df.columns)
+            sellers_df = pd.read_excel(sellers_file_path, engine='openpyxl')
 
             # Perform VLOOKUP to add a 'Seller_ID' column to the main file
             merged_df = pd.merge(main_df, sellers_df[['User', 'Seller_ID']], on='User', how='left')
@@ -82,15 +93,4 @@ def main():
                         filepath = os.path.join(output_folder_name, filename)
                         zipf.write(filepath, arcname=filename)
 
-            st.success("Zip file created successfully.")
-            st.download_button(label="Download All as Zip", data=open(f"{output_folder_name}.zip", "rb").read(), file_name=f"{output_folder_name}.zip", mime="application/zip")
-
-        except FileNotFoundError as file_not_found_error:
-            st.error(f"Error: {file_not_found_error}. Please make sure the files exist.")
-        except pd.errors.ParserError as parser_error:
-            st.error(f"Error parsing the input files: {parser_error}")
-        except Exception as e:
-            st.error(f"An unexpected error occurred: {e}")
-
-if __name__ == "__main__":
-    main()
+            st.success

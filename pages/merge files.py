@@ -9,13 +9,13 @@ def preprocess_data(df):
         df[['ID', 'Full Value']] = df['Categories'].str.split(' - ', 1, expand=True)
         # Split the 'Full Value' column into individual categories
         df['Categories'] = df['Full Value'].str.split(' / ')
-        # Fill missing values with empty lists
-        df['Categories'] = df['Categories'].fillna('').astype(str)
+        # Concatenate all values into a single column
+        df['Single Column'] = df['Categories'].apply(lambda x: ' / '.join(x))
+        # Drop unnecessary columns
+        df = df.drop(columns=['ID', 'Full Value', 'Categories'])
     else:
-        # If 'Categories' column is not present, create dummy columns
-        df['ID'] = ""
-        df['Full Value'] = ""
-        df['Categories'] = ""
+        # If 'Categories' column is not present, create a dummy column
+        df['Single Column'] = ""
     return df
 
 def merge_excel_files(files):
